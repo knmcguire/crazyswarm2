@@ -100,7 +100,7 @@
 <p>High-level Python scripts can be visualized before execution. The initial position and number of robots is taken from the crazyflies.yaml configuration file.
 The simulation uses the firmware code as software-in-the-loop, but (currently) does not include any dynamics.</p>
 <p>Example:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2 run crazyswarm2_examples hello_world --sim
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2 run crazyflie_examples hello_world --sim
 </pre></div>
 </div>
 </section>
@@ -108,28 +108,30 @@ The simulation uses the firmware code as software-in-the-loop, but (currently) d
 <h2>Physical Experiments<a class="headerlink" href="#physical-experiments" title="Permalink to this heading"></a></h2>
 <section id="ros2-terminal">
 <h3>ROS2 terminal<a class="headerlink" href="#ros2-terminal" title="Permalink to this heading"></a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2 param <span class="nb">set</span> crazyswarm2_server cf1/params/commander/enHighLevel <span class="m">1</span>
-ros2 param <span class="nb">set</span> crazyswarm2_server cf3/params/stabilizer/estimator <span class="m">2</span>
-ros2 service call cf1/takeoff crazyswarm2_interfaces/srv/Takeoff <span class="s2">&quot;{height: 0.5, duration: {sec: 2}}&quot;</span>
-ros2 service call cf1/land crazyswarm2_interfaces/srv/Land <span class="s2">&quot;{height: 0.0, duration: {sec: 2}}&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2 run crazyflie reboot --uri radio://0/80/2M/E7E7E7E706 --mode sysoff
+
+ros2 param <span class="nb">set</span> crazyflie cf1/params/commander/enHighLevel <span class="m">1</span>
+ros2 param <span class="nb">set</span> crazyflie cf1/params/stabilizer/estimator <span class="m">2</span>
+ros2 service call cf1/takeoff crazyflie_interfaces/srv/Takeoff <span class="s2">&quot;{height: 0.5, duration: {sec: 2}}&quot;</span>
+ros2 service call cf1/land crazyflie_interfaces/srv/Land <span class="s2">&quot;{height: 0.0, duration: {sec: 2}}&quot;</span>
 </pre></div>
 </div>
 </section>
 <section id="teleoperation">
 <h3>Teleoperation<a class="headerlink" href="#teleoperation" title="Permalink to this heading"></a></h3>
 <p>We currently assume an XBox controller (the button mapping can be changed in teleop.yaml). It is possible to fly in different modes, including attitude-control and position-control (in which case any localization system can assist.)</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2 launch crazyswarm2 launch.py
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2 launch crazyflie launch.py
 </pre></div>
 </div>
 </section>
 <section id="python-scripts">
 <h3>Python scripts<a class="headerlink" href="#python-scripts" title="Permalink to this heading"></a></h3>
 <p>In the first terminal, launch</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2 launch crazyswarm2 launch.py
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2 launch crazyflie launch.py
 </pre></div>
 </div>
 <p>In the second terminal</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2 run crazyswarm2_examples hello_world
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2 run crazyflie_examples hello_world
 </pre></div>
 </div>
 </section>
