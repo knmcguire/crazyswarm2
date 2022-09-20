@@ -49,8 +49,13 @@
 <li class="toctree-l2"><a class="reference internal" href="#simulation">Simulation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#physical-experiments">Physical Experiments</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#ros2-terminal">ROS2 terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#enabling-logblocks">Enabling Logblocks</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#teleoperation">Teleoperation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#python-scripts">Python scripts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#vizualization">Vizualization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rviz2-default-topics">RVIZ2 default topics</a></li>
 </ul>
 </li>
 </ul>
@@ -117,6 +122,25 @@ ros2 service call cf1/land crazyflie_interfaces/srv/Land <span class="s2">&quot;
 </pre></div>
 </div>
 </section>
+<section id="enabling-logblocks">
+<h3>Enabling Logblocks<a class="headerlink" href="#enabling-logblocks" title="Permalink to this heading"></a></h3>
+<p>In one terminal run
+.. code-block:: bash</p>
+<blockquote>
+<div><p>ros2 launch crazyflie launch.py backend:=cflib</p>
+</div></blockquote>
+<p>In another terminal after sourcing the right setup.bash files, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2 service call /cf2/add_logging crazyflie_interfaces/srv/AddLogging <span class="s2">&quot;{topic_name: &#39;topic_test&#39;, frequency: 10, vars: [&#39;stateEstimate.x&#39;,&#39;stateEstimate.y&#39;,&#39;stateEstimate.z&#39;]}&quot;</span>
+ros2 service call /cf2/add_logging crazyflie_interfaces/srv/AddLogging <span class="s2">&quot;{topic_name: &#39;pose&#39;, frequency: 10}</span>
+</pre></div>
+</div>
+<p>With ROS2’s rqt you can checkout the topics, or with ‘ROS2 topics echo /cf2/pose’</p>
+<p>To close the logblocks again, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2 service call /cf2/remove_logging crazyflie_interfaces/srv/RemoveLogging <span class="s2">&quot;{topic_name: &#39;topic_test&#39;}&quot;</span>
+ros2 service call /cf2/remove_logging crazyflie_interfaces/srv/RemoveLogging <span class="s2">&quot;{topic_name: &#39;pose&#39;}&quot;</span>
+</pre></div>
+</div>
+</section>
 <section id="teleoperation">
 <h3>Teleoperation<a class="headerlink" href="#teleoperation" title="Permalink to this heading"></a></h3>
 <p>We currently assume an XBox controller (the button mapping can be changed in teleop.yaml). It is possible to fly in different modes, including attitude-control and position-control (in which case any localization system can assist.)</p>
@@ -134,6 +158,37 @@ ros2 service call cf1/land crazyflie_interfaces/srv/Land <span class="s2">&quot;
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2 run crazyflie_examples hello_world
 </pre></div>
 </div>
+</section>
+</section>
+<section id="vizualization">
+<h2>Vizualization<a class="headerlink" href="#vizualization" title="Permalink to this heading"></a></h2>
+<section id="rviz2-default-topics">
+<h3>RVIZ2 default topics<a class="headerlink" href="#rviz2-default-topics" title="Permalink to this heading"></a></h3>
+<p>Make sure your crazyflie knows it’s position, either by a flowdeck or another global positioning system</p>
+<p>In crazyflie.yaml, make sure that this following is added or uncommented</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>all:
+...
+firmware_logging:
+    enabled: <span class="nb">true</span>
+    default_topics:
+    pose:
+        frequency: <span class="m">10</span> <span class="c1"># Hz</span>
+</pre></div>
+</div>
+<p>In the first terminal, launch the server (CFlib backend only for now)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2 launch crazyflie launch.py backend:<span class="o">=</span>cflib
+</pre></div>
+</div>
+<p>In the second terminal</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rviz2
+</pre></div>
+</div>
+<p>Then set ‘fixed frame’ to ‘world’ and add the TF plugin. Then in ‘TF’, check  the ‘show names’ checkbox.
+The crazyflie names should appear with their estimated position.</p>
+<p>This RVIZ2 visualization can be done for the default topics:
+* ‘pose’: ‘/cf1/pose/’ Transforms and Pose
+* ‘odom’: ‘/cf1/odom/’ Odometry
+* ‘scan’: ‘/cf1/scan’ Scan</p>
 </section>
 </section>
 </section>
