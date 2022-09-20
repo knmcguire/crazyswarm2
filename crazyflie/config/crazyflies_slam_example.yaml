@@ -1,0 +1,29 @@
+robots:
+  cf2:
+    enabled: true
+    uri: radio://0/20/2M/E7E7E7E702
+    initial_position: [0, 0, 0]
+    type: cf21  # see robot_types
+
+robot_types:
+  cf21:
+    motion_capture:
+      enabled: false
+      marker: default_single_marker
+      dynamics: default
+    big_quad: false
+    battery:
+      voltage_warning: 3.8  # V
+      voltage_critical: 3.7 # V
+
+all:
+  firmware_logging:
+    enabled: true
+    default_topics:
+     # remove to disable default topic
+      #pose:
+      #  frequency: 10 # Hz
+      odom:
+        frequency: 10
+      scan:
+        frequency: 10
