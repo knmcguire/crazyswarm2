@@ -52,19 +52,30 @@ class State:
 
 class Action:
     """Class that stores the action of a UAV as used in the simulator interface"""
-    def __init__(self, rpm):
+    def __init__(self, rpm, cmd):
         # internally use one numpy array
-        self._action = np.empty(4)
+        self._action = np.empty(8)
         self.rpm = rpm
+        self.cmd = cmd
 
     @property
     def rpm(self):
         """rotation per second [rpm]"""
-        return self._action
+        return self._action[0:4]
 
     @rpm.setter
     def rpm(self, value):
-        self._action = value
+        self._action[0:4] = value
+
+    @property
+    def cmd(self):
+        """command for roll pitch yaw and thrust"""
+        return self._action[4:8]
+
+    @rpm.setter
+    def cmd(self, value):
+        self._action[4:8] = value
+
 
     def __repr__(self) -> str:
-        return "Action rpm={}".format(self.rpm)
+        return "Action rpm={}".format(self.rpm) + ", cmd={}".format(self.cmd)

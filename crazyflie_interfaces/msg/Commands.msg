@@ -1,0 +1,9 @@
+std_msgs/Header header
+float32 m1rpm
+float32 m2rpm
+float32 m3rpm
+float32 m4rpm
+float32 roll
+float32 pitch
+float32 yaw
+float32 thrust

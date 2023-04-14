@@ -263,7 +263,7 @@ class CrazyflieSIL:
             return None
 
         if self.mode != CrazyflieSIL.MODE_HIGH_POLY:
-            return sim_data_types.Action([0,0,0,0])
+            return sim_data_types.Action([0,0,0,0],[0,0,0,0])
 
         time_in_seconds = self.time_func()
         # ticks is essentially the time in milliseconds as an integer
@@ -298,11 +298,14 @@ class CrazyflieSIL:
             force_in_grams = np.polyval(p, pwm)
             force_in_newton = force_in_grams * 9.81 / 1000.0
             return np.maximum(force_in_newton, 0)
+        
 
+        
         return sim_data_types.Action([pwm_to_rpm(self.motors_thrust_pwm.motors.m1),
             pwm_to_rpm(self.motors_thrust_pwm.motors.m2),
             pwm_to_rpm(self.motors_thrust_pwm.motors.m3),
-            pwm_to_rpm(self.motors_thrust_pwm.motors.m4)])
+            pwm_to_rpm(self.motors_thrust_pwm.motors.m4)],
+            [self.control.roll, self.control.pitch, self.control.yaw, self.control.thrust])
 
 
     @staticmethod
