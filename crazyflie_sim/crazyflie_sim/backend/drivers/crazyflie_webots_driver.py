@@ -19,6 +19,8 @@ from crazyflie_interfaces.msg import FullState, Commands
 sys.path.append('/home/knmcguire/Development/bitcraze/c/crazyflie-firmware')
 import cffirmware
 
+
+
 import numpy as np
 
 class CrazyflieWebotsDriver:
@@ -70,16 +72,13 @@ class CrazyflieWebotsDriver:
             FullState, '/cf231/desired_state', self.desired_state_callback, 1)
         self.node.create_subscription(
             Commands, '/cf231/commands', self.command_callback, 1)
-        self.target_twist = Twist()
+        self.target_state = FullState()
         self.state_publisher = self.node.create_publisher(FullState, '/cf231/next_state', 1)
 
         self.node.get_logger().info("state info")
 
     def desired_state_callback(self, msg):
-        self.target_twist = Twist()
-        self.target_twist.linear.x = msg.twist.linear.x
-        self.target_twist.linear.y = msg.twist.linear.y
-        self.target_twist.angular.z = msg.twist.angular.z
+        self.target_state = msg
 
         self.node.get_logger().info(f"{msg.pose.orientation.x} {msg.pose.orientation.y} {msg.pose.orientation.z} {msg.pose.orientation.w}")
 
@@ -156,17 +155,18 @@ class CrazyflieWebotsDriver:
 
         ## Fill in Setpoints
         setpoint = cffirmware.setpoint_t()
-        setpoint.mode.z = cffirmware.modeAbs
-        setpoint.position.z = 1.0
         setpoint.mode.yaw = cffirmware.modeVelocity
 
         # TODO: find out why this multipication is necessary...
-        setpoint.attitudeRate.yaw = degrees(self.target_twist.angular.z)*5
-        setpoint.mode.x = cffirmware.modeVelocity
-        setpoint.mode.y = cffirmware.modeVelocity
-        setpoint.velocity.x = self.target_twist.linear.x
-        setpoint.velocity.y = self.target_twist.linear.y
-        setpoint.velocity_body = True
+        setpoint.mode.yaw = cffirmware.modeVelocity
+        setpoint.attitudeRate.yaw = degrees(self.target_state.twist.angular.z)*5
+        setpoint.mode.x = cffirmware.modeAbs
+        setpoint.mode.y = cffirmware.modeAbs
+        setpoint.mode.z = cffirmware.modeAbs
+        setpoint.position.x = self.target_state.pose.position.x
+        setpoint.position.y = self.target_state.pose.position.y
+        setpoint.position.z = self.target_state.pose.position.z
+
 
         ## Firmware PID bindings
         control = cffirmware.control_t()

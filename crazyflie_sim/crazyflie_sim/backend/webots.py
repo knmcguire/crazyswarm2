@@ -31,7 +31,6 @@ class Backend:
             self.next_states[name] = State()
 
     def next_state_callback(self, msg, name='cf231'):
-        self.node.get_logger().info(f"{msg}")
         self.next_states[name] = State(
             pos=np.array([msg.pose.position.x, msg.pose.position.y, msg.pose.position.z]),
             vel=np.array([msg.twist.linear.x, msg.twist.linear.y, msg.twist.linear.z]),
@@ -76,7 +75,7 @@ class Backend:
             msg.pose.orientation.y = state.quat[2]
             msg.pose.orientation.z = state.quat[3]
             msg.pose.orientation.w = state.quat[0]
-            msg.twist.linear.x = 0.1#state.vel[0]
+            msg.twist.linear.x = state.vel[0]
             msg.twist.linear.y = state.vel[1]
             msg.twist.linear.z = state.vel[2]
             msg.twist.angular.x = state.omega[0]
