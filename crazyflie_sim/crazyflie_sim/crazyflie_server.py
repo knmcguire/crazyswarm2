@@ -85,7 +85,6 @@ class CrazyflieServer(Node):
                 initial_state.pos,
                 controller_name,
                 self.backend.time)
-            self.cf_publishers[name] = []
 
         # Create services for the entire swarm and each individual crazyflie
         self.create_service(Empty, "all/emergency", self._emergency_callback)
@@ -130,9 +129,6 @@ class CrazyflieServer(Node):
                 FullState, name +
                 "/cmd_full_state", partial(self._cmd_full_state_changed, name=name), 10
             )
-            self.cf_publishers[name] = self.create_publisher(
-                FullState, name + "/desired_state", 10
-            )
 
         # step as fast as possible
         max_dt = 0.0 if "max_dt" not in self._ros_parameters["sim"] else self._ros_parameters["sim"]["max_dt"]
@@ -150,26 +146,6 @@ class CrazyflieServer(Node):
     def _timer_callback(self):
         # update setpoint
         states_desired = [cf.getSetpoint() for name, cf in self.cfs.items()]
-
-        for name, cf in self.cfs.items():
-            state_desired = cf.getSetpoint() 
-            msg = FullState()
-            msg.header.stamp = self.get_clock().now().to_msg()
-            msg.header.frame_id = self.world_tf_name
-            msg.pose.position.x = state_desired.pos[0]
-            msg.pose.position.y = state_desired.pos[1]
-            msg.pose.position.z = state_desired.pos[2]
-            msg.pose.orientation.x = state_desired.quat[1]
-            msg.pose.orientation.y = state_desired.quat[2]
-            msg.pose.orientation.z = state_desired.quat[3]
-            msg.pose.orientation.w = state_desired.quat[0]
-            msg.twist.linear.x = state_desired.vel[0]
-            msg.twist.linear.y = state_desired.vel[1]
-            msg.twist.linear.z = state_desired.vel[2]
-            msg.twist.angular.x = state_desired.omega[0]
-            msg.twist.angular.y = state_desired.omega[1]
-            msg.twist.angular.z = state_desired.omega[2]
-            self.cf_publishers[name].publish(msg)
 
         # execute the control loop
         actions = [cf.executeController()  for _, cf in self.cfs.items()]

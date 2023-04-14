@@ -8,12 +8,12 @@ find_package(ament_cmake_python REQUIRED)
 # Install Python modules
 ament_python_install_package(${PROJECT_NAME} SCRIPTS_DESTINATION lib/${PROJECT_NAME})
 
-# # Install launch and config files.
-# install(DIRECTORY
-#   config
-#   data
-#   launch
-#   DESTINATION share/${PROJECT_NAME}/
-# )
+# Install launch and config files.
+install(DIRECTORY
+  launch
+  worlds
+  resource
+  DESTINATION share/${PROJECT_NAME}/
+)
 
 ament_package()

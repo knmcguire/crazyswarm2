@@ -36,6 +36,7 @@ class Backend:
         self.clock_publisher.publish(clock_message)
 
         for name, state in zip(self.names, states_desired):
+            self.node.get_logger().info(f"{name} {state.pos} {state.vel} {state.quat} {state.omega}")
             msg = FullState()
             msg.header.stamp = Time(seconds=self.time()).to_msg()
             msg.pose.position.x = state.pos[0]
