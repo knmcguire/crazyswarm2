@@ -13,12 +13,13 @@ from tf2_ros import TransformBroadcaster
 from geometry_msgs.msg import TransformStamped
 
 
-from crazyflie_interfaces.msg import FullState
+from crazyflie_interfaces.msg import FullState, Commands
 
 # Change this path to your crazyflie-firmware folder
 sys.path.append('/home/knmcguire/Development/bitcraze/c/crazyflie-firmware')
 import cffirmware
 
+import numpy as np
 
 class CrazyflieWebotsDriver:
     def init(self, webots_node, properties):
@@ -58,6 +59,8 @@ class CrazyflieWebotsDriver:
         self.first_x_global = 0.0
         self.first_y_global = 0.0
 
+        self.target_cmds = np.array([0, 0, 0, 0])
+
         cffirmware.controllerPidInit()
 
         rclpy.init(args=None)
@@ -65,8 +68,10 @@ class CrazyflieWebotsDriver:
 
         self.node.create_subscription(
             FullState, '/cf231/desired_state', self.desired_state_callback, 1)
-
+        self.node.create_subscription(
+            Commands, '/cf231/commands', self.command_callback, 1)
         self.target_twist = Twist()
+        self.state_publisher = self.node.create_publisher(FullState, '/cf231/next_state', 1)
 
         self.node.get_logger().info("state info")
 
@@ -76,11 +81,13 @@ class CrazyflieWebotsDriver:
         self.target_twist.linear.y = msg.twist.linear.y
         self.target_twist.angular.z = msg.twist.angular.z
 
-        
-
         self.node.get_logger().info(f"{msg.pose.orientation.x} {msg.pose.orientation.y} {msg.pose.orientation.z} {msg.pose.orientation.w}")
 
-    
+    def command_callback(self, msg):
+        self.target_cmds = np.array([msg.roll, msg.pitch, msg.yaw, msg.thrust])   
+        self.node.get_logger().info(f"{msg.roll} {msg.pitch} {msg.yaw} {msg.thrust}")
+
+
     def step(self):
 
         rclpy.spin_once(self.node, timeout_sec=0)
@@ -106,6 +113,26 @@ class CrazyflieWebotsDriver:
         vy_global = (y_global - self.past_y_global)/dt
         z_global = self.gps.getValues()[2]
         vz_global = (z_global - self.past_z_global)/dt
+
+        msg = FullState()
+        msg.pose.position.x = x_global
+        msg.pose.position.y = y_global
+        msg.pose.position.z = z_global
+        # roll pitch yaw to quarternion x y z w
+        q_base = tf_transformations.quaternion_from_euler(roll, pitch, yaw)
+        msg.pose.orientation.x = q_base[0]
+        msg.pose.orientation.y = q_base[1]
+        msg.pose.orientation.z = q_base[2]
+        msg.pose.orientation.w = q_base[3]
+
+        msg.twist.linear.x = vx_global
+        msg.twist.linear.y = vy_global
+        msg.twist.linear.z = vz_global
+        msg.twist.angular.x = roll_rate
+        msg.twist.angular.y = pitch_rate
+        msg.twist.angular.z = yaw_rate
+
+        self.state_publisher.publish(msg)
 
         ## Put measurement in state estimate
         # TODO replace these with a EKF python binding
@@ -152,13 +179,18 @@ class CrazyflieWebotsDriver:
         cmd_yaw = -radians(control.yaw)
         cmd_thrust = control.thrust
 
+        #cmd_roll = radians(self.target_cmds[0])
+        #cmd_pitch = radians(self.target_cmds[1])
+        #cmd_yaw = -radians(self.target_cmds[2])
+        #cmd_thrust = self.target_cmds[3]
+
         ## Motor mixing
         motorPower_m1 =  cmd_thrust - cmd_roll + cmd_pitch + cmd_yaw
         motorPower_m2 =  cmd_thrust - cmd_roll - cmd_pitch - cmd_yaw
         motorPower_m3 =  cmd_thrust + cmd_roll - cmd_pitch + cmd_yaw
         motorPower_m4 =  cmd_thrust + cmd_roll + cmd_pitch - cmd_yaw
 
-        scaling = 1000 ##Todo, remove necessity of this scaling (SI units in firmware)
+        scaling = 900 ##Todo, remove necessity of this scaling (SI units in firmware)
         self.m1_motor.setVelocity(-motorPower_m1/scaling)
         self.m2_motor.setVelocity(motorPower_m2/scaling)
         self.m3_motor.setVelocity(-motorPower_m3/scaling)
