@@ -72,7 +72,7 @@ class Action:
         """command for roll pitch yaw and thrust"""
         return self._action[4:8]
 
-    @rpm.setter
+    @cmd.setter
     def cmd(self, value):
         self._action[4:8] = value
 

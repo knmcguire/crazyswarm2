@@ -11,7 +11,6 @@ from functools import partial
 import numpy as np
 
 class Backend:
-    """Tracks the desired state perfectly (no physics simulation)"""
 
     def __init__(self, node: Node, names: list[str], states: list[State]):
         self.node = node
@@ -50,7 +49,7 @@ class Backend:
         #clock_message.clock = Time(seconds=self.time()).to_msg()
         #self.clock_publisher.publish(clock_message)
         for action, name in zip(actions, self.names):
-            self.node.get_logger().info(f"{action.rpm} {action.cmd}")
+            #self.node.get_logger().info(f"{action}")
             msg = Commands()
             msg.header.stamp = Time(seconds=self.time()).to_msg()
             msg.roll = action.cmd[0]
@@ -61,11 +60,10 @@ class Backend:
             msg.m2rpm = action.rpm[1]
             msg.m3rpm = action.rpm[2]
             msg.m4rpm = action.rpm[3]
-
             self.cmd_publishers[name].publish(msg)
 
         for name, state in zip(self.names, states_desired):
-            self.node.get_logger().info(f"{name} {state.pos} {state.vel} {state.quat} {state.omega}")
+            #self.node.get_logger().info(f"{name} {state.pos} {state.vel} {state.quat} {state.omega}")
             msg = FullState()
             msg.header.stamp = Time(seconds=self.time()).to_msg()
             msg.pose.position.x = state.pos[0]

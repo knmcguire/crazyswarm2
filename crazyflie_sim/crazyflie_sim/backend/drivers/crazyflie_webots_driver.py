@@ -75,16 +75,15 @@ class CrazyflieWebotsDriver:
         self.target_state = FullState()
         self.state_publisher = self.node.create_publisher(FullState, '/cf231/next_state', 1)
 
-        self.node.get_logger().info("state info")
 
     def desired_state_callback(self, msg):
         self.target_state = msg
 
-        self.node.get_logger().info(f"{msg.pose.orientation.x} {msg.pose.orientation.y} {msg.pose.orientation.z} {msg.pose.orientation.w}")
+        #self.node.get_logger().info(f"{msg.pose.orientation.x} {msg.pose.orientation.y} {msg.pose.orientation.z} {msg.pose.orientation.w}")
 
     def command_callback(self, msg):
         self.target_cmds = np.array([msg.roll, msg.pitch, msg.yaw, msg.thrust])   
-        self.node.get_logger().info(f"{msg.roll} {msg.pitch} {msg.yaw} {msg.thrust}")
+        #self.node.get_logger().info(f"cmd callback {msg.roll} {msg.pitch} {msg.yaw} {msg.thrust}")
 
 
     def step(self):
@@ -184,6 +183,12 @@ class CrazyflieWebotsDriver:
         #cmd_yaw = -radians(self.target_cmds[2])
         #cmd_thrust = self.target_cmds[3]
 
+        #self.node.get_logger().info(f"targets {self.target_cmds[0]} {self.target_cmds[1]} {self.target_cmds[2]} {self.target_cmds[3]}")
+
+        #self.node.get_logger().info(f"onboard {control.roll} {control.pitch} {control.yaw} {control.thrust}")
+
+        #self.node.get_logger().info(f"sil {cmd_roll} {cmd_pitch} {cmd_yaw} {cmd_thrust}")
+        #self.node.get_logger().info(f"dri {radians(control.roll)} {radians(control.pitch)} {radians(control.yaw)} {control.thrust}")
         ## Motor mixing
         motorPower_m1 =  cmd_thrust - cmd_roll + cmd_pitch + cmd_yaw
         motorPower_m2 =  cmd_thrust - cmd_roll - cmd_pitch - cmd_yaw

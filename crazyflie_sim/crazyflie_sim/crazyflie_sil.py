@@ -267,7 +267,7 @@ class CrazyflieSIL:
 
         time_in_seconds = self.time_func()
         # ticks is essentially the time in milliseconds as an integer
-        tick = int(time_in_seconds * 1000)
+        tick = 100#int(time_in_seconds * 1000)
         if self.controller_name != "mellinger":
             self.controller(self.control, self.setpoint, self.sensors, self.state, tick)
         else:
@@ -300,12 +300,14 @@ class CrazyflieSIL:
             return np.maximum(force_in_newton, 0)
         
 
+        rpm = np.array([pwm_to_force(self.motors_thrust_pwm.motors.m1),
+            pwm_to_force(self.motors_thrust_pwm.motors.m2),
+            pwm_to_force(self.motors_thrust_pwm.motors.m3),
+            pwm_to_force(self.motors_thrust_pwm.motors.m4)])
         
-        return sim_data_types.Action([pwm_to_rpm(self.motors_thrust_pwm.motors.m1),
-            pwm_to_rpm(self.motors_thrust_pwm.motors.m2),
-            pwm_to_rpm(self.motors_thrust_pwm.motors.m3),
-            pwm_to_rpm(self.motors_thrust_pwm.motors.m4)],
-            [self.control.roll, self.control.pitch, self.control.yaw, self.control.thrust])
+        cmd = np.array([self.control.roll, self.control.pitch, self.control.yaw, self.control.thrust])
+        
+        return sim_data_types.Action(rpm, cmd)
 
 
     @staticmethod
